@@ -87,7 +87,7 @@ python3 scripts/validate_outputs.py
 python3 scripts/package_submission.py
 ```
 
-Artifacts kiểm tra: `trace.jsonl`, `metadata.json`, 50 file trong `output/` và `submission_outputs.zip`.
+Artifacts kiểm tra: `trace.jsonl`, `metadata.json`, 50 file trong `output/` và `output.zip`. ZIP giữ wrapper `output/` theo định dạng portal đã xác nhận.
 
 ## 10. Cam kết
 

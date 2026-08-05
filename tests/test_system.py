@@ -22,6 +22,7 @@ from core.models import (
     PaymentFact,
 )
 from core.trace import TraceWriter
+from scripts.package_submission import create_archive, expected_archive_entries
 
 
 class FakeRepository:
@@ -230,6 +231,19 @@ class SystemTests(unittest.TestCase):
             lines = path.read_text(encoding="utf-8").splitlines()
             self.assertEqual(len(lines), 1)
             self.assertEqual(json.loads(lines[0])["event"], "new")
+
+    def test_21_submission_zip_has_output_wrapper(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            output = root / "output"
+            output.mkdir()
+            for index in range(1, 51):
+                (output / f"EC_{index:03d}.json").write_text(
+                    "{}\n", encoding="utf-8"
+                )
+            archive = root / "output.zip"
+            entries = create_archive(root, archive)
+            self.assertEqual(entries, expected_archive_entries())
 
 
 if __name__ == "__main__":
