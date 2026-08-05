@@ -1,4 +1,26 @@
 {
+  "student_name": "Bùi Thế Huy",
+  "student_id": "2A202601881",
+  "student_id_last5": "01881",
+  "team_members": [
+    {
+      "name": "Nguyễn Duy Trọng",
+      "student_id": "2A202601333",
+      "role": "Leader"
+    },
+    {
+      "name": "Nguyễn Hoàng Tín",
+      "student_id": "2A202601603",
+      "role": "Member"
+    },
+    {
+      "name": "Bùi Thế Huy",
+      "student_id": "2A202601881",
+      "role": "Member"
+    }
+  ],
+  "team_process": "All members contributed, reviewed variants and selected the highest-scoring stable baseline for group submission.",
+  "submission_variant": "95-point baseline",
   "model": "rule-engine-no-llm",
   "parameter_size": "0B",
   "uses_llm": false,
@@ -6,7 +28,16 @@
   "framework": "stdlib deterministic multi-agent pipeline",
   "runtime": "Python 3.13",
   "policy_version": "EC_POLICY_V1",
+  "confidence_profile": {
+    "canceled_order_paid": 0.99,
+    "unavailable_order_paid": 0.99,
+    "late_delivery_seller": 0.96,
+    "late_delivery_logistics": 0.95,
+    "valid_split_payment": 0.94,
+    "unsupported_late_claim": 0.91
+  },
   "cases_processed": 50,
   "input_dir": "input",
-  "output_dir": "output"
+  "output_dir": "output",
+  "trace_path": "trace.jsonl"
 }
