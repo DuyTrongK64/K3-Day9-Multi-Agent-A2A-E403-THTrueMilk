@@ -116,7 +116,7 @@ python3 scripts/validate_outputs.py
 
 ```bash
 python3 scripts/package_submission.py
-unzip -l output.zip
+unzip -l submission_outputs.zip
 ```
 
-Script từ chối package khi validator fail. Theo định dạng đã được portal xác nhận, ZIP có entry `output/` và đúng 50 child entries `output/EC_001.json`…`output/EC_050.json`; không chứa artifact hoặc file khác.
+Script từ chối package khi validator fail; ZIP chứa trực tiếp và chỉ `EC_001.json`…`EC_050.json`, không có wrapper directory hay artifact khác.

@@ -213,4 +213,4 @@ python3 scripts/validate_outputs.py
 python3 scripts/package_submission.py
 ```
 
-`run_all.py` xóa output cũ, truncate trace, xử lý đúng 50 case và chỉ ghi case đã qua Verifier. `package_submission.py` gọi validator trước khi tạo `output.zip` theo định dạng portal thực tế: một entry `output/` chứa đúng 50 JSON `output/EC_001.json`…`output/EC_050.json`.
+`run_all.py` xóa output cũ, truncate trace, xử lý đúng 50 case và chỉ ghi case đã qua Verifier. `package_submission.py` gọi validator trước khi tạo `submission_outputs.zip` với đúng 50 JSON ở root của archive.
