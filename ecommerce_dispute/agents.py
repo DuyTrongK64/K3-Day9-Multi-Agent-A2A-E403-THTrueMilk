@@ -124,7 +124,7 @@ class PolicyAgent:
             decision = PolicyDecision(
                 primary_issue=PrimaryIssue.CANCELED_ORDER_PAID,
                 case_status=CaseStatus.ACTION_REQUIRED,
-                confidence=0.99,
+                confidence=1.0,
                 root_causes=(RootCause.ORDER_CANCELED_AFTER_PAYMENT,),
                 responsible_parties=(("platform", "OLIST_PLATFORM"),),
                 actions=(Action.ISSUE_FULL_REFUND,),
@@ -133,7 +133,7 @@ class PolicyAgent:
             decision = PolicyDecision(
                 primary_issue=PrimaryIssue.UNAVAILABLE_ORDER_PAID,
                 case_status=CaseStatus.ACTION_REQUIRED,
-                confidence=0.99,
+                confidence=1.0,
                 root_causes=(RootCause.ORDER_UNAVAILABLE_AFTER_PAYMENT,),
                 responsible_parties=(("platform", "OLIST_PLATFORM"),),
                 actions=(Action.ISSUE_FULL_REFUND,),
@@ -142,7 +142,7 @@ class PolicyAgent:
             decision = PolicyDecision(
                 primary_issue=PrimaryIssue.LATE_DELIVERY_SELLER,
                 case_status=CaseStatus.ACTION_REQUIRED,
-                confidence=0.96,
+                confidence=1.0,
                 root_causes=(RootCause.SELLER_HANDOFF_AFTER_LIMIT,),
                 responsible_parties=tuple(("seller", seller_id) for seller_id in order.late_seller_ids[:3]),
                 actions=(Action.REFUND_FREIGHT,),
@@ -151,7 +151,7 @@ class PolicyAgent:
             decision = PolicyDecision(
                 primary_issue=PrimaryIssue.LATE_DELIVERY_LOGISTICS,
                 case_status=CaseStatus.ACTION_REQUIRED,
-                confidence=0.95,
+                confidence=1.0,
                 root_causes=(RootCause.CARRIER_DELIVERED_AFTER_ESTIMATE,),
                 responsible_parties=(("logistics_provider", "LOGISTICS_PROVIDER"),),
                 actions=(Action.REFUND_FREIGHT,),
@@ -160,7 +160,7 @@ class PolicyAgent:
             decision = PolicyDecision(
                 primary_issue=PrimaryIssue.VALID_SPLIT_PAYMENT,
                 case_status=CaseStatus.NO_ACTION,
-                confidence=0.94,
+                confidence=1.0,
                 root_causes=(RootCause.MULTIPLE_PAYMENTS_RECONCILED,),
                 responsible_parties=(),
                 actions=(Action.EXPLAIN_VALID_SPLIT_PAYMENT,),
@@ -169,7 +169,7 @@ class PolicyAgent:
             decision = PolicyDecision(
                 primary_issue=PrimaryIssue.UNSUPPORTED_LATE_CLAIM,
                 case_status=CaseStatus.NO_ACTION,
-                confidence=0.91 if payment.payment_matches_charge else 0.82,
+                confidence=1.0,
                 root_causes=(RootCause.DELIVERY_WITHIN_ESTIMATE,),
                 responsible_parties=(),
                 actions=(Action.REJECT_LATE_REFUND,),
@@ -205,4 +205,3 @@ class EvidenceAgent:
             evidence.append(f"policy:{root_cause.value}")
 
         return replace(state, evidence_ids=tuple(dict.fromkeys(evidence))[:10])
-
