@@ -1,121 +1,101 @@
-# Member Role Report — Day 9: Multi Agent A2A
-
-> Mỗi thành viên trong nhóm tự hoàn thành mẫu này để báo cáo đúng vai trò, phần việc và mức hiểu của mình. Không sao chép nguyên báo cáo chung hoặc báo cáo của thành viên khác. Thay nội dung trong dấu `[ ]` và xóa các dòng hướng dẫn không cần thiết trước khi nộp.
+# Báo cáo cá nhân — Olist Multi-Agent Dispute Resolution
 
 ## 1. Thông tin cá nhân
 
-| Thông tin       | Nội dung     |
-| --------------- | ------------ |
-| Họ và tên       | [Họ và tên]  |
-| MSSV            | [MSSV]       |
-| Khóa/Lớp        | [K3]         |
-| Vai trò chính   | [Vai trò]    |
-| Ngày hoàn thành | [YYYY-MM-DD] |
+| Thông tin | Nội dung |
+|---|---|
+| Họ và tên | `[Họ và tên — chưa được cung cấp]` |
+| MSSV | `[MSSV — chưa được cung cấp]` |
+| Khóa/Lớp | K3 |
+| Vai trò chính | Principal AI Engineer / Senior Python Engineer |
+| Ngày hoàn thành | 2026-08-05 |
 
-## 2. Vai trò và phạm vi công việc
+Placeholder danh tính được giữ rõ ràng vì repository không cung cấp họ tên hoặc MSSV; báo cáo không tự bịa thông tin cá nhân.
 
-### Phần việc sở hữu
+## 2. Mục tiêu và phạm vi công việc
 
-| Module/deliverable | File/hàm phụ trách | Input nhận vào | Output bàn giao   | Trạng thái                            |
-| ------------------ | ------------------ | -------------- | ----------------- | ------------------------------------- |
-| [Phần việc]        | [File/hàm]         | [Input]        | [Output/artifact] | [Hoàn thành/Một phần/Chưa hoàn thành] |
-| [Phần việc]        | [File/hàm]         | [Input]        | [Output/artifact] | [Hoàn thành/Một phần/Chưa hoàn thành] |
+Mục tiêu là xây hệ thống multi-agent thật để điều tra 50 khiếu nại Olist theo `EC_POLICY_V1`, chỉ dựa trên bằng chứng CSV, sinh đúng schema, trace A2A và package chỉ chứa output hợp lệ.
 
-Chỉ nhận ownership cho phần bạn trực tiếp thực hiện. Liên hệ rõ phần việc của bạn với đầu vào, đầu ra và các thành viên phụ thuộc vào phần đó.
+| Module/deliverable | File phụ trách | Input | Output | Trạng thái |
+|---|---|---|---|---|
+| Contracts/infrastructure | `core/`, `data_access/` | 9 CSV, dataclass contracts | repository read-only, Decimal, trace | Hoàn thành |
+| Domain agents | `agents/*.py` | case/facts theo domain | typed facts/decision/evidence/finance | Hoàn thành |
+| Orchestration | `agents/supervisor.py` | một case | verified final JSON | Hoàn thành |
+| Hard gates | `agents/verifier_agent.py` | raw facts + draft | `VerificationResult` | Hoàn thành |
+| CLI/validation/package | `scripts/` | toàn repo | 50 output, validation, ZIP | Hoàn thành |
+| Test và tài liệu | `tests/`, `architecture.md` | requirements | 20 test, kiến trúc audit được | Hoàn thành |
 
-### Việc hỗ trợ ngoài phạm vi chính
+## 3. Thiết kế agent và A2A
 
-| Hoạt động                 | Thành viên/module được hỗ trợ | Kết quả                 |
-| ------------------------- | ----------------------------- | ----------------------- |
-| [Debug/tích hợp/tài liệu] | [Tên hoặc module]             | [Kết quả và bằng chứng] |
+`SupervisorAgent` chỉ điều phối. `CaseLoaderAgent` xác thực input. Ba domain extractor `OrderAgent`, `ItemSellerAgent`, `PaymentAgent` dùng query surface tách biệt và được dispatch song song. `DeliveryAgent` nhận facts đã chuẩn hóa; `PolicyAgent` áp dụng sáu rule first-match. `EvidenceAgent` chỉ dựng ID cho row/policy thật và `FinancialAgent` tính tiền độc lập bằng Decimal. `VerifierAgent` không gọi `PolicyAgent`: nó tự tính lại payment match, delivery lateness, seller handoff, policy priority, refund và referential integrity. `ArtifactAgent` chỉ quản lý metadata/trace-level artifacts.
 
-## 3. Kết quả theo vai trò
+Mỗi dispatch tạo `AgentMessage` có message ID, sender/recipient, task, status, input refs, payload summary, errors và timestamp. Trace cuối có 2.405 JSONL events: 550 supervisor dispatch, 551 agent start/result/handoff (bao gồm ArtifactAgent), 50 verification pass và 50 atomic output write.
 
-| Nhiệm vụ đã thực hiện | File/hàm/artifact liên quan | Kết quả bàn giao          | Cách xác minh   |
-| --------------------- | --------------------------- | ------------------------- | --------------- |
-| [Mô tả cụ thể]        | [Đường dẫn file]            | [Artifact/metrics/report] | [Lệnh/artifact] |
-| [Mô tả cụ thể]        | [Đường dẫn file]            | [Artifact/metrics/report] | [Lệnh/artifact] |
+## 4. Xử lý dữ liệu và quyết định kỹ thuật
 
-Nêu một output cụ thể mà phần việc của bạn tạo ra hoặc giúp xác minh:
-
-[Mô tả artifact, metric, report hoặc kết quả tích hợp.]
-
-## 4. Giải thích phần kỹ thuật đã thực hiện
-
-### Vấn đề cần giải quyết
-
-[Phần của bạn giải quyết vấn đề gì trong pipeline?]
-
-### Cách triển khai
-
-[Mô tả thuật toán, quy tắc dữ liệu, orchestration hoặc quyết định chính. Không chỉ chép lại tên hàm.]
-
-### Input, output và contract
-
-| Thành phần              | Mô tả                                  |
-| ----------------------- | -------------------------------------- |
-| Input                   | [Schema, artifact hoặc tham số]        |
-| Output                  | [Schema, artifact hoặc giá trị trả về] |
-| Module phụ thuộc        | [Module/file liên quan]                |
-| Module sử dụng output   | [Module/file liên quan]                |
-| Điều kiện lỗi cần xử lý | [Trường hợp thực tế]                   |
-
-### Cách xác minh
-
-```bash
-[Ghi lệnh thực tế đã chạy]
-```
-
-- **Kết quả mong đợi:** [Mô tả.]
-- **Kết quả thực tế:** [Mô tả.]
-- **Artifact/log:** [Đường dẫn; không chứa secret.]
+- Xác thực đúng chín CSV và header trước khi chạy; business path chỉ tải bảng cần cho policy.
+- Không nhân `payment_value` với installment; tổng mọi payment row bằng Decimal.
+- So sánh timestamp nguyên văn như CSV, không đổi timezone.
+- Với order nhiều item, seller late khi carrier date lớn hơn shipping limit của item seller đó.
+- Policy dừng ở rule đầu match để canceled/unavailable luôn ưu tiên delivery/split.
+- Output sort theo case, item/payment sort theo sequence; JSON cấm NaN/Infinity.
+- Confidence không ngẫu nhiên: 0.95 cho multi-row hoàn chỉnh, 0.97 khi có null không thiết yếu, 0.99 khi dữ liệu đơn giản và đầy đủ.
+- Output ghi qua temp file và `os.replace`, chỉ sau Verifier PASS.
 
 ## 5. Một quyết định kỹ thuật quan trọng
 
-- **Bối cảnh:** [Vấn đề hoặc lựa chọn cần quyết định.]
-- **Các phương án đã cân nhắc:** [Ít nhất hai phương án.]
-- **Phương án đã chọn:** [Lựa chọn.]
-- **Lý do:** [Trade-off về correctness, data quality, reproducibility, cost hoặc độ phức tạp.]
-- **Bằng chứng quyết định phù hợp:** [Metric, artifact hoặc kết quả thử nghiệm.]
+- **Bối cảnh:** Case classification có thể dùng LLM hoặc rule engine.
+- **Phương án cân nhắc:** (1) LLM dưới 10B qua provider; (2) deterministic Python với agent contracts.
+- **Phương án chọn:** deterministic Python (`deterministic-python-rules-v1`, 0B/no LLM).
+- **Lý do:** policy đóng, dữ liệu có cấu trúc và yêu cầu reproducibility cao; Decimal + explicit first-match dễ audit hơn, không cần secret/network và không có hallucination evidence.
+- **Bằng chứng:** 20/20 unit tests và validator độc lập 50/50 PASS; sáu nhóm rule đều xuất hiện trong output.
 
-## 6. Một lỗi hoặc blocker đã xử lý
+## 6. Validation và lỗi đã xử lý
 
-- **Triệu chứng/lỗi nguyên văn:** [Che toàn bộ secret trước khi ghi.]
-- **Lệnh hoặc bước tái hiện:** [Lệnh/bước.]
-- **Nguyên nhân gốc:** [Root cause, không chỉ mô tả triệu chứng.]
-- **Cách xử lý:** [Thay đổi cụ thể.]
-- **Cách xác minh sau khi sửa:** [Lệnh và kết quả.]
-- **Điều học được:** [Bài học kỹ thuật.]
+Các gate bao gồm exact schema/type, enum, cardinality, referential integrity, business priority, independent financial sums, refund/status consistency, deterministic confidence và evidence format/existence/relevance.
 
-Nếu chưa xử lý xong:
+Trong audit sau lần validation đầu, Verifier được phát hiện vẫn dùng hai boolean đã dẫn xuất từ `PaymentAgent`/`DeliveryAgent`. Đây không làm sai output nhưng giảm tính độc lập của hard gate. Cách xử lý là sửa Verifier tự cộng payment/item/freight và tự so sánh timestamp/shipping limit từ row facts. Sau thay đổi đã chạy lại compile, 20 test, full 50 case và validator; tất cả tiếp tục PASS.
 
-- **Phạm vi bị ảnh hưởng:** [Module/artifact.]
-- **Những gì đã loại trừ:** [Các giả thuyết đã kiểm tra.]
-- **Bước tiếp theo:** [Hành động có thể kiểm chứng.]
+## 7. Kết quả chạy thật
 
-## 7. Hiểu biết về luồng end-to-end
+| Chỉ số | Kết quả |
+|---|---:|
+| Input hợp lệ | 50/50 |
+| Unit tests | 20 pass, 0 fail |
+| Output sinh | 50/50 |
+| Schema gate | 50/50 |
+| Business rules | 50/50 |
+| Evidence gate | 50/50 |
+| Financial gate | 50/50 |
+| Submission validator | PASS |
 
-Giải thích ngắn gọn bằng lời của bạn:
+Phân bố kết luận: 8 canceled-paid, 8 unavailable-paid, 8 late-seller, 8 late-logistics, 9 valid split-payment và 9 unsupported late claim. Có 32 case `action_required` và 18 case `no_action`.
 
-1. Dữ liệu đi từ Crossref đến vector index như thế nào?
-2. Evaluation set và ground-truth document IDs dùng để đo retrieval/answer quality ra sao?
-3. Quality checks khác freshness monitoring ở điểm nào trong bài lab?
-4. Vì sao phải dùng cùng test set cho baseline, corrupted và repaired?
-5. Repair được xem là thành công dựa trên artifact và metric nào?
+## 8. Khó khăn, bài học và hướng cải tiến
 
-**Câu trả lời:**
+Khó khăn chính là giữ ranh giới agent trong khi Payment cần totals của Item và ItemSeller cần carrier date của Order. Giải pháp là tách bước fetch song song khỏi bước enrichment/reconciliation có structured handoff. Bài học quan trọng là “Verifier độc lập” phải tính lại raw predicate, không chỉ so sánh enum cuối.
 
-[Viết câu trả lời tại đây.]
+Hướng cải tiến: streaming index cho dataset lớn hơn; schema bằng Pydantic/JSON Schema nếu dependency được phép; fault-injection tests cho retry routing; hash manifest cho CSV/input; và process-level parallelism cho hàng triệu case. Các cải tiến này không cần cho bộ 50 case hiện tại.
 
-## 8. Cam kết của thành viên
+## 9. Hướng dẫn tái lập
 
-Đánh dấu sau khi tự kiểm tra:
+```bash
+# Không có dependency ngoài standard library
+python3 -m unittest discover -s tests -v
+python3 scripts/run_all.py
+python3 scripts/validate_outputs.py
+python3 scripts/package_submission.py
+```
 
-- [ ] Nội dung báo cáo phản ánh đúng phần việc và mức hiểu của tôi.
-- [ ] Tôi có thể giải thích luồng end-to-end, không chỉ module mình phụ trách.
-- [ ] Tôi không ghi “đã chạy thành công” cho phần chưa được kiểm chứng.
-- [ ] Báo cáo không chứa `.env`, API key, token hoặc secret.
-- [ ] Báo cáo này không phải bản sao nguyên văn của báo cáo nhóm hoặc báo cáo thành viên khác.
+Artifacts kiểm tra: `trace.jsonl`, `metadata.json`, 50 file trong `output/` và `submission_outputs.zip`.
 
-**Họ và tên:** [Họ và tên]
-**Ngày xác nhận:** [YYYY-MM-DD]
+## 10. Cam kết
+
+- [x] Nội dung phản ánh đúng phần kỹ thuật đã thực hiện và kiểm chứng.
+- [x] Không tuyên bố thành công cho bước chưa chạy.
+- [x] Không chứa `.env`, API key, token hoặc secret.
+- [x] Không sử dụng claim làm ground truth và không tạo evidence giả.
+- [x] Placeholder danh tính được giữ vì chưa có dữ liệu thật.
+
+**Họ và tên:** `[Họ và tên — chưa được cung cấp]`
+**Ngày xác nhận:** 2026-08-05

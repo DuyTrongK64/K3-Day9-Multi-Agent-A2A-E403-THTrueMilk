@@ -1,0 +1,64 @@
+{
+  "system_name": "Olist Multi-Agent Dispute Resolution",
+  "model": {
+    "name": "deterministic-python-rules-v1",
+    "parameter_size": "0B (no LLM)",
+    "provider": "local",
+    "usage": "No LLM is invoked; deterministic Python rules classify cases."
+  },
+  "framework": "custom-python-dataclass-agents",
+  "runtime": {
+    "language": "Python",
+    "python_version": "3.14.5",
+    "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O"
+  },
+  "agents": [
+    {
+      "name": "SupervisorAgent",
+      "role": "coordination"
+    },
+    {
+      "name": "CaseLoaderAgent",
+      "role": "input validation"
+    },
+    {
+      "name": "OrderAgent",
+      "role": "order and customer facts"
+    },
+    {
+      "name": "ItemSellerAgent",
+      "role": "item and seller facts"
+    },
+    {
+      "name": "PaymentAgent",
+      "role": "payment reconciliation"
+    },
+    {
+      "name": "DeliveryAgent",
+      "role": "delivery timeline analysis"
+    },
+    {
+      "name": "PolicyAgent",
+      "role": "ordered policy evaluation"
+    },
+    {
+      "name": "EvidenceAgent",
+      "role": "evidence selection"
+    },
+    {
+      "name": "FinancialAgent",
+      "role": "decimal-safe financial calculation"
+    },
+    {
+      "name": "VerifierAgent",
+      "role": "independent hard-gate verification"
+    },
+    {
+      "name": "ArtifactAgent",
+      "role": "run artifacts and packaging support"
+    }
+  ],
+  "policy_version": "EC_POLICY_V1",
+  "case_count": 50,
+  "generated_at": "2026-08-05T03:27:35.955839+00:00"
+}
