@@ -1,121 +1,90 @@
-# Member Role Report — Day 9: Multi Agent A2A
+# Individual Report - Day 9 Multi-Agent A2A
 
-> Mỗi thành viên trong nhóm tự hoàn thành mẫu này để báo cáo đúng vai trò, phần việc và mức hiểu của mình. Không sao chép nguyên báo cáo chung hoặc báo cáo của thành viên khác. Thay nội dung trong dấu `[ ]` và xóa các dòng hướng dẫn không cần thiết trước khi nộp.
+## 1. Personal Information
 
-## 1. Thông tin cá nhân
+| Field | Value |
+| --- | --- |
+| Full name | 5SoCuoiMHV_HoVaTen |
+| Student ID | 5SoCuoiMHV |
+| Class | K3 |
+| Main role | Principal AI Engineer / Multi-Agent Pipeline Owner |
+| Completion date | 2026-08-05 |
 
-| Thông tin       | Nội dung     |
-| --------------- | ------------ |
-| Họ và tên       | [Họ và tên]  |
-| MSSV            | [MSSV]       |
-| Khóa/Lớp        | [K3]         |
-| Vai trò chính   | [Vai trò]    |
-| Ngày hoàn thành | [YYYY-MM-DD] |
+## 2. Owned Scope
 
-## 2. Vai trò và phạm vi công việc
+| Deliverable | Files | Input | Output | Status |
+| --- | --- | --- | --- | --- |
+| Deterministic agent pipeline | `ecommerce_dispute/agents.py`, `ecommerce_dispute/coordinator.py` | Case JSON and repository facts | Structured agent state and final decision | Complete |
+| Data layer | `ecommerce_dispute/repository.py` | Olist CSV files | Cached lookup indexes | Complete |
+| Verifier | `ecommerce_dispute/verifier.py` | Final output JSON | Pass/fail validation | Complete |
+| Runner and artifacts | `ecommerce_dispute/runner.py` | `input/EC_*.json` | `output/*.json`, `trace.jsonl`, `metadata.json` | Complete |
+| Tests | `tests/test_policy_pipeline.py` | Real Olist examples and temp cases | Unit, policy, verifier and integration checks | Complete |
 
-### Phần việc sở hữu
+## 3. Technical Summary
 
-| Module/deliverable | File/hàm phụ trách | Input nhận vào | Output bàn giao   | Trạng thái                            |
-| ------------------ | ------------------ | -------------- | ----------------- | ------------------------------------- |
-| [Phần việc]        | [File/hàm]         | [Input]        | [Output/artifact] | [Hoàn thành/Một phần/Chưa hoàn thành] |
-| [Phần việc]        | [File/hàm]         | [Input]        | [Output/artifact] | [Hoàn thành/Một phần/Chưa hoàn thành] |
+The solution avoids hallucination by not using an LLM for scored decisions. It loads orders, order items, payments and sellers once, then each case is resolved through separate agents with typed dataclass handoffs.
 
-Chỉ nhận ownership cho phần bạn trực tiếp thực hiện. Liên hệ rõ phần việc của bạn với đầu vào, đầu ra và các thành viên phụ thuộc vào phần đó.
+The policy engine implements `EC_POLICY_V1` in exact priority order:
 
-### Việc hỗ trợ ngoài phạm vi chính
+1. paid canceled order
+2. paid unavailable order
+3. late delivery caused by seller handoff
+4. late delivery caused by logistics
+5. valid split payment
+6. unsupported late claim
 
-| Hoạt động                 | Thành viên/module được hỗ trợ | Kết quả                 |
-| ------------------------- | ----------------------------- | ----------------------- |
-| [Debug/tích hợp/tài liệu] | [Tên hoặc module]             | [Kết quả và bằng chứng] |
+All money is calculated with `Decimal`, rounded to 2 decimals, and split-payment reconciliation uses the required 0.10 BRL tolerance.
 
-## 3. Kết quả theo vai trò
+## 4. Input / Output Contract
 
-| Nhiệm vụ đã thực hiện | File/hàm/artifact liên quan | Kết quả bàn giao          | Cách xác minh   |
-| --------------------- | --------------------------- | ------------------------- | --------------- |
-| [Mô tả cụ thể]        | [Đường dẫn file]            | [Artifact/metrics/report] | [Lệnh/artifact] |
-| [Mô tả cụ thể]        | [Đường dẫn file]            | [Artifact/metrics/report] | [Lệnh/artifact] |
+| Component | Contract |
+| --- | --- |
+| Input | `input/EC_XXX.json` with `case_id`, `customer_request.claimed_order_id`, `policy_version` |
+| Output | One schema-compliant JSON per input case in `output/` |
+| Trace | Fresh `trace.jsonl` generated per run |
+| Metadata | Root `metadata.json` declaring `rule-engine-no-llm`, `0B` parameters |
+| Failure behavior | Verifier failure raises an error and prevents output writing |
 
-Nêu một output cụ thể mà phần việc của bạn tạo ra hoặc giúp xác minh:
-
-[Mô tả artifact, metric, report hoặc kết quả tích hợp.]
-
-## 4. Giải thích phần kỹ thuật đã thực hiện
-
-### Vấn đề cần giải quyết
-
-[Phần của bạn giải quyết vấn đề gì trong pipeline?]
-
-### Cách triển khai
-
-[Mô tả thuật toán, quy tắc dữ liệu, orchestration hoặc quyết định chính. Không chỉ chép lại tên hàm.]
-
-### Input, output và contract
-
-| Thành phần              | Mô tả                                  |
-| ----------------------- | -------------------------------------- |
-| Input                   | [Schema, artifact hoặc tham số]        |
-| Output                  | [Schema, artifact hoặc giá trị trả về] |
-| Module phụ thuộc        | [Module/file liên quan]                |
-| Module sử dụng output   | [Module/file liên quan]                |
-| Điều kiện lỗi cần xử lý | [Trường hợp thực tế]                   |
-
-### Cách xác minh
+## 5. Verification Run
 
 ```bash
-[Ghi lệnh thực tế đã chạy]
+python3 -m unittest discover -s tests -v
 ```
 
-- **Kết quả mong đợi:** [Mô tả.]
-- **Kết quả thực tế:** [Mô tả.]
-- **Artifact/log:** [Đường dẫn; không chứa secret.]
+Actual result:
 
-## 5. Một quyết định kỹ thuật quan trọng
+```text
+Ran 9 tests in 6.092s
+OK
+```
 
-- **Bối cảnh:** [Vấn đề hoặc lựa chọn cần quyết định.]
-- **Các phương án đã cân nhắc:** [Ít nhất hai phương án.]
-- **Phương án đã chọn:** [Lựa chọn.]
-- **Lý do:** [Trade-off về correctness, data quality, reproducibility, cost hoặc độ phức tạp.]
-- **Bằng chứng quyết định phù hợp:** [Metric, artifact hoặc kết quả thử nghiệm.]
+The tests cover all six policy branches, false-positive evidence rejection, output limits and runner integration.
 
-## 6. Một lỗi hoặc blocker đã xử lý
+## 6. Important Engineering Decision
 
-- **Triệu chứng/lỗi nguyên văn:** [Che toàn bộ secret trước khi ghi.]
-- **Lệnh hoặc bước tái hiện:** [Lệnh/bước.]
-- **Nguyên nhân gốc:** [Root cause, không chỉ mô tả triệu chứng.]
-- **Cách xử lý:** [Thay đổi cụ thể.]
-- **Cách xác minh sau khi sửa:** [Lệnh và kết quả.]
-- **Điều học được:** [Bài học kỹ thuật.]
+Decision: use a deterministic rule engine instead of LLM reasoning.
 
-Nếu chưa xử lý xong:
+Reason: the rubric rewards exact entity, evidence, root cause and financial correctness. The data already contains the required facts, while an LLM would increase nondeterminism and hallucination risk.
 
-- **Phạm vi bị ảnh hưởng:** [Module/artifact.]
-- **Những gì đã loại trừ:** [Các giả thuyết đã kiểm tra.]
-- **Bước tiếp theo:** [Hành động có thể kiểm chứng.]
+Trade-off: no natural-language interpretation beyond reading `claimed_order_id`, but the assignment explicitly states that this key is the retrieval anchor.
 
-## 7. Hiểu biết về luồng end-to-end
+## 7. Blocker Handled
 
-Giải thích ngắn gọn bằng lời của bạn:
+Blocker: the current repository has no official `input/EC_001.json` through `EC_050.json`; `input/` contains only `.gitkeep`.
 
-1. Dữ liệu đi từ Crossref đến vector index như thế nào?
-2. Evaluation set và ground-truth document IDs dùng để đo retrieval/answer quality ra sao?
-3. Quality checks khác freshness monitoring ở điểm nào trong bài lab?
-4. Vì sao phải dùng cùng test set cho baseline, corrupted và repaired?
-5. Repair được xem là thành công dựa trên artifact và metric nào?
+Resolution: the runner is built to process all `EC_*.json` files when they are provided and to avoid generating fake outputs when inputs are absent.
 
-**Câu trả lời:**
+## 8. End-to-End Understanding
 
-[Viết câu trả lời tại đây.]
+Data flows from CSV into cached repository indexes, then from the input case into the coordinator. The coordinator passes structured state through domain-specific agents, applies the policy rule engine, builds evidence and financial totals, validates everything with an independent verifier, then writes output and trace artifacts.
 
-## 8. Cam kết của thành viên
+Quality is measured by matching the rubric fields per case, not by answer fluency. The most important checks are policy priority, ID existence, evidence validity and exact refund calculation.
 
-Đánh dấu sau khi tự kiểm tra:
+## 9. Commitment
 
-- [ ] Nội dung báo cáo phản ánh đúng phần việc và mức hiểu của tôi.
-- [ ] Tôi có thể giải thích luồng end-to-end, không chỉ module mình phụ trách.
-- [ ] Tôi không ghi “đã chạy thành công” cho phần chưa được kiểm chứng.
-- [ ] Báo cáo không chứa `.env`, API key, token hoặc secret.
-- [ ] Báo cáo này không phải bản sao nguyên văn của báo cáo nhóm hoặc báo cáo thành viên khác.
+- [x] The report reflects the implemented work.
+- [x] I can explain the end-to-end pipeline and each agent contract.
+- [x] I only report tests that were actually run.
+- [x] No `.env`, API key, token or secret is included.
+- [x] The solution does not depend on a model larger than 10B parameters.
 
-**Họ và tên:** [Họ và tên]
-**Ngày xác nhận:** [YYYY-MM-DD]

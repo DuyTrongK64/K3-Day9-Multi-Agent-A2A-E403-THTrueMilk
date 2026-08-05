@@ -1,0 +1,12 @@
+{
+  "model": "rule-engine-no-llm",
+  "parameter_size": "0B",
+  "uses_llm": false,
+  "max_allowed_parameter_size": "10B",
+  "framework": "stdlib deterministic multi-agent pipeline",
+  "runtime": "Python 3.13",
+  "policy_version": "EC_POLICY_V1",
+  "cases_processed": 50,
+  "input_dir": "input",
+  "output_dir": "output"
+}
